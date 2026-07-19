@@ -1,3 +1,0 @@
-The problem was that I had cloned the repository using HTTPS: git clone https://github.com/codec-ai/codec-ai.github.io. With HTTPS, GitHub requires a personal access token, and sometimes it causes authentication issues.
-
-The fix was to clone using SSH instead: git clone git@github.com:codec-ai/codec-ai.github.io.git
