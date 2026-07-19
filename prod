@@ -1,0 +1,13 @@
+In the command line interface, type these commands. Replace <space holders> with your personal information.
+
+a) git config --global user.email <yourEmail>
+
+b) git config --global user.name “<yourUrerName”
+
+c) git remote set-url origin <urlForYourRepo>
+
+(if no repo currently exists, use this command instead) git remote add origin <urlForYourRepo>
+
+d) git branch -M main
+
+e) git push -u origin main
