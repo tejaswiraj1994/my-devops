@@ -1,0 +1,126 @@
+Master Node or Control plane: it should have minimum 2 GB RAM, 2 CPU
+
+Ports should be opened on Master or Control plane:
+
+TCP	Inbound	6443	Kubernetes API server	All
+TCP	Inbound	2379-2380	etcd server client API	kube-apiserver, etcd
+TCP	Inbound	10250	Kubelet API	Self, Control plane
+TCP	Inbound	10259	kube-scheduler	Self
+TCP	Inbound	10257	kube-controller-manager	Self
+
+
+Worker Node: These Ports should be opened
+
+TCP	Inbound	10250	Kubelet API	Self, Control plane
+TCP	Inbound	10256	kube-proxy	Self, Load balancers
+TCP	Inbound	30000-32767	NodePort Services†	All
+UDP	Inbound	30000-32767	NodePort Services†	
+
+
+Launch Ec2 Instance for Master Node: 
+
+---> take ubuntu 22.04 and t2.medium and default vpc and defaul Security Group
+
+Launch Ec2 for Worker Nodes: 
+
+ubuntu 22.04 & t2.micro 
+
+
+
+1) when we create a kubernetes cluster right we need to first download container run time  on all nodes ( master & worker )
+From Kubernetes < 1.20 Kubelet can communicate directly communicate with docker but in latest versions
+
+kubelet ---> CRI ---> Docker
+ 
+
+containerd
+CRI-O
+Docker Engine
+Mirantis Container Runtime
+
+Install docker as continer Run time:( https://get.docker.com/ ) ---> here this link you can find script to install docker
+
+ 1. download the script
+#
+#   $ curl -fsSL https://get.docker.com -o install-docker.sh
+#
+# 2. verify the script's content
+#
+#   $ cat install-docker.sh
+#
+# 3. run the script with --dry-run to verify the steps it executes
+#
+#   $ sh install-docker.sh --dry-run
+#
+# 4. run the script either as root, or using sudo to perform the installation.
+#
+#   $ sudo sh install-docker.sh
+#
+
+
+ADD ubuntu user to docker group 
+sudo usermod -aG docker ubuntu
+
+
+Installing kubeadm, kubelet and kubectl on all nodes
+
+
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+sudo systemctl enable --now kubelet
+
+
+Very Important Note:
+Docker Engine does not implement the CRI which is a requirement for a container runtime to work with Kubernetes. For that reason, an additional service cri-dockerd has to be installed. cri-dockerd is a project based on the legacy built-in Docker Engine support that was removed from the kubelet in version 1.24.
+
+ Configure CRI-Dockerd  on all the nodes refer below github link to install
+
+( https://github.com/Mirantis/cri-dockerd )
+
+use this link to : https://github.com/containerd/containerd/releases ( also we need runc,cni plugin)
+
+
+wget https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.17/cri-dockerd_0.3.17.3-0.ubuntu-jammy_amd64.deb
+
+sudo dpkg -i cri-dockerd_0.3.17.3-0.ubuntu-jammy_amd64.deb
+
+
+on Master Node execute below commands to setup the Cluster
+
+sudo kubeadm init --cri-socket unix:///var/run/cri-dockerd.sock
+
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, if you are the root user, you can run:
+
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+
+
+
+
+kubeadm join 172.31.18.243:6443 --token 4yq2jq.6jktlflg91oicufn \
+        --discovery-token-ca-cert-hash sha256:b9561bcb3ca328550572e505fc18dfef943e8aadeebe93c55eed8601e37b0c96 \
+        --cri-socket unix:///var/run/cri-dockerd.sock
+
+
+Install CNI Plugins:
+
+install weave net
+
+https://github.com/rajch/weave#using-weave-on-kubernetes
+
+kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.29/net.yaml
+
+
