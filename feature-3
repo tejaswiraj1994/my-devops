@@ -1,0 +1,5 @@
+Press: Windows + R
+Enter this command: control /name Microsoft.CredentialManager
+Navigate to Windows Credentials you'll find git Credentials -> REMOVE it
+In VsCode terminal enter this command: git remote add origin <-url-of-your-repository->
+you'll be navigated to account setup page.
