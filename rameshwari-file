@@ -1,0 +1,2 @@
+Confirm that your remote URL is correct and points to the right repository. You can check this with git remote -v. Ensure it's using HTTPS (https://github.com/...) if you're using PATs or SSH (git@github.com:...) if you've set up SSH keys.
+If you are using SSH, ensure your SSH key is correctly added to your GitHub account and your SSH agent is running.
