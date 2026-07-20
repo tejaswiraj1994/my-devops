@@ -1,0 +1,4 @@
+Use Personal Access Tokens (PATs): Always use a PAT for Git operations over HTTPS instead of your GitHub password.
+Review PAT Scopes: When generating a PAT, ensure it has the necessary permissions (scopes) for the actions you intend to perform (e.g., pushing code).
+Clear Stale Credentials: If you've recently changed your GitHub password or PAT, clear any old credentials stored in your operating system's credential manager.
+Consider SSH: For frequent interactions
